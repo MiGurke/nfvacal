@@ -36,7 +36,7 @@ process IndexBams {
   file(bam) from rgbam_ch
 
   output:
-  tuple file(bam) into ibam_ch
+  tuple file(bam), file('*.bai') into ibam_ch
 
   script:
   """
@@ -45,16 +45,66 @@ process IndexBams {
 }
 
 process CallVariants {
-  echo true
 
   input:
-  file(all_bams) from ibam_ch.collect()
+  file(allf) from ibam_ch.collect()
   each chr from chr_list
+
+  output:
+  file('*') into chrvcf_ch
+
+  script:
+  def bams = allf.findAll{it =~ /bam_RG$/}
+  //def bams = allf.collect { assert it ==~ pattern }
+  """
+  freebayes -f ${params.ref} -r $chr ${bams.join(' ')}  > ${chr}.vcf
+  """
+
+
+}
+
+process CompressVCF {
+
+  input:
+  file(chr) from chrvcf_ch
+
+  output:
+  file('*') into chrvcfgz_ch
 
   script:
   """
-  freebayes -f ${params.ref} -r $chr $all_bams > ${params.outdir}/${chr}.vcf
+  bgzip -c $chr > ${chr}.gz
   """
+}
 
+process IndexVCF {
 
+  input:
+  file(chr) from chrvcfgz_ch
+
+  output:
+  tuple file(chr), file('*') into chrvcfgzi_ch
+
+  script:
+  """
+  bcftools index $chr
+  """
+}
+
+process MergeVCF {
+
+  publishDir "${params.outdir}", mode: 'copy'
+
+  input:
+  file(all_chr) from chrvcfgzi_ch.collect()
+
+  output:
+  file('*out.vcf.gz*') into vcf_ch
+
+  script:
+  def vcfs = all_chr.findAll{it =~ /gz$/}
+  """
+  bcftools concat ${vcfs.join(' ')} | bgzip -c > nfvacal_out.vcf.gz
+  bcftools index nfvacal_out.vcf.gz
+  """
 }
