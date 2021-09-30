@@ -99,12 +99,32 @@ process MergeVCF {
   file(all_chr) from chrvcfgzi_ch.collect()
 
   output:
-  file('*out.vcf.gz*') into vcf_ch
+  file('*out.vcf.gz') into vcf_ch
 
   script:
   def vcfs = all_chr.findAll{it =~ /gz$/}
   """
   bcftools concat ${vcfs.join(' ')} | bgzip -c > nfvacal_out.vcf.gz
-  bcftools index nfvacal_out.vcf.gz
+  """
+}
+
+process Stats {
+
+  input:
+  file(vcf) from vcf_ch
+  output:
+  tuple file('*.frq'), file('*.het'), file('*.idepth'), file('*.imiss'), file('*.ldepth.mean'), file('*.lmiss'), file('*.lqual'), file('*.txt') into stats_ch
+
+  script:
+  """
+  bcftools index $vcf
+  vcftools --gzvcf $vcf --freq2 --max-alleles 2
+  vcftools --gzvcf $vcf --depth
+  vcftools --gzvcf $vcf --site-mean-depth
+  vcftools --gzvcf $vcf --site-quality
+  vcftools --gzvcf $vcf --missing-indv
+  vcftools --gzvcf $vcf --missing-site
+  vcftools --gzvcf $vcf --het
+  vcfstats $vcf > vcfstats.txt
   """
 }
