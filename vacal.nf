@@ -46,6 +46,8 @@ process IndexBams {
 
 process CallVariants {
 
+  label 'RAM_high'
+
   input:
   file(allf) from ibam_ch.collect()
   each chr from chr_list
