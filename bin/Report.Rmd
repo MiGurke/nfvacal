@@ -18,9 +18,9 @@ params:
 
 ```{r setup, include=FALSE}
 install.packages('ggplot2')
-install.package('readr')
-install.package('knitr')
-install.package('dplyr')
+install.packages('readr')
+install.packages('knitr')
+install.packages('dplyr')
 library('ggplot2')
 library('readr')
 library('knitr')
