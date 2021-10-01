@@ -109,22 +109,44 @@ process MergeVCF {
 }
 
 process Stats {
+  publishDir "${params.outdir}/stats/", mode: 'copy'
 
   input:
   file(vcf) from vcf_ch
+
   output:
   tuple file('*.frq'), file('*.het'), file('*.idepth'), file('*.imiss'), file('*.ldepth.mean'), file('*.lmiss'), file('*.lqual'), file('*.txt') into stats_ch
 
   script:
   """
-  bcftools index $vcf
-  vcftools --gzvcf $vcf --freq2 --max-alleles 2
-  vcftools --gzvcf $vcf --depth
-  vcftools --gzvcf $vcf --site-mean-depth
-  vcftools --gzvcf $vcf --site-quality
-  vcftools --gzvcf $vcf --missing-indv
-  vcftools --gzvcf $vcf --missing-site
-  vcftools --gzvcf $vcf --het
+  bcftools index -f $vcf
   vcfstats $vcf > vcfstats.txt
+  vcfrandomsample -r 0.01  $vcf > ${vcf.baseName}_subset.vcf
+  bgzip ${vcf.baseName}_subset.vcf
+  bcftools index ${vcf.baseName}_subset.vcf.gz
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --freq2 --max-alleles 2
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --depth
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --site-mean-depth
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --site-quality
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --missing-indv
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --missing-site
+  vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --het
+
   """
+}
+
+process Report {
+  publishDir "${params.outdir}", mode: 'copy'
+
+  input:
+  tuple file(frq), file(het), file(idepth), file(imiss), file(ldepth), file(lmiss), file(lqual), file(vcfstats) from stats_ch
+
+  output:
+  file('*.html') into report_ch
+
+  script:
+  """
+  Rscript -e "rmarkdown::render('${projectDir}/bin/Report.Rmd', params=list(vcfstats='\$PWD/${vcfstats}',lqual='\$PWD/${lqual}',idepth='\$PWD/${idepth}',ldepth='\$PWD/${ldepth}',imiss='\$PWD/${imiss}',lmiss='\$PWD/${lmiss}',het='\$PWD/${het}',frq='\$PWD/${frq}'), output_dir='\$PWD')"
+  """
+
 }

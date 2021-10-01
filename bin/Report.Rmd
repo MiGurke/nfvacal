@@ -1,0 +1,147 @@
+---
+title: "NFVACAL Report"
+output: 
+  html_document:
+    theme: yeti
+    toc: true
+    toc_float: true
+params:
+  vcfstats: ' '
+  lqual: ' '
+  idepth: ' '
+  ldepth: ' '
+  imiss: ' '
+  lmiss: ' '
+  het: ' '
+  frq: ' '
+---
+
+```{r setup, include=FALSE}
+library('ggplot2')
+library('readr')
+library('knitr')
+library('dplyr')
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r file_reader, echo=FALSE, warning=FALSE}
+vcfstats <- read_file(params$vcfstats)
+lqual <- read.table(params$lqual, header = TRUE)
+idepth <- read.table(params$idepth, header = TRUE)
+ldepth <- read.table(params$ldepth, header = TRUE)
+imiss <- read.table(params$imiss, header = TRUE)
+lmiss <- read.table(params$lmiss, header = TRUE)
+het <- read.table(params$het, header = TRUE)
+frq <- read.table(params$frq, header = TRUE, row.names = c())
+colnames(frq) <- c('CHROM','POS','N_ALLELES','N_CHR', 'A1', 'A2')
+```
+
+
+This report contains the statistics about the variant calling just done using ncvacal. 
+
+# General statistics (vcfstats)
+
+```{r echo=FALSE, warning=FALSE, comment=NA}
+cat(vcfstats)
+```
+# Variant quality per site
+
+Summary stats of variant quality scores per site:
+
+```{r lqual_sum, echo=FALSE, warning=FALSE}
+summary(lqual$QUAL)
+```
+
+```{r lqual, echo=FALSE, warning=FALSE}
+ggplot(lqual, aes(QUAL, after_stat(count))) +
+  geom_density(fill='#03440C', alpha = 0.7) +
+  ylab("No. sites") +
+  xlab("Quality score")
+```
+
+# Variant depth
+
+## Depths per individual
+```{r idepth_plot, echo=FALSE, warning=FALSE}
+ggplot(idepth, aes(x=as.factor(INDV), y=MEAN_DEPTH)) +
+  geom_bar(stat = 'identity', fill='#03440C', alpha = 0.7, colour='black') +
+  xlab("Individual") +
+  ylab("Mean depth") +
+  coord_flip()
+```
+
+```{r idepth, echo=FALSE, warning=FALSE}
+colnames(idepth) <- c('Indiviual', 'No. Sites', 'Mean Depth')
+kable(idepth)
+```
+
+## Depth per site
+
+Summary stats of mean depth per site:
+
+```{r ldepth_sum, echo=FALSE, warning=FALSE}
+summary(ldepth$MEAN_DEPTH)
+```
+
+```{r ldepth, echo=FALSE, warning=FALSE}
+ggplot(ldepth, aes(MEAN_DEPTH, after_stat(count))) +
+  geom_density(fill='#03440C', alpha = 0.7) +
+  ylab("No. sites") +
+  xlab("Mean Depth") 
+```
+
+# Missing data at variant sites
+
+## Missing data per individual
+```{r imiss_plot, echo=FALSE, warning=FALSE}
+ggplot(imiss, aes(x=as.factor(INDV), y=F_MISS)) +
+  geom_bar(stat = 'identity', fill='#03440C', alpha = 0.7, color='black') +
+  xlab("Individual") +
+  ylab(paste("Fraction of missing sites\n(Total variant sites: ",imiss$N_DATA[1],")"))+
+  coord_flip()
+```
+
+```{r imiss, echo=FALSE, warning=FALSE}
+colnames(imiss) <- c('Indiviual', 'Total variant sites', 'No. of genotypes filtered', 'No. of missing sites', 'Fraction of missing sites')
+kable(imiss)
+```
+## Missing individuals per variant
+
+Summary stats of fraction of missing individuals per site: 
+```{r lmiss_sum, echo=FALSE, warning=FALSE}
+summary(lmiss$F_MISS)
+```
+```{r lmiss, echo=FALSE, warning=FALSE}
+ggplot(lmiss, aes(F_MISS, after_stat(count))) +
+  geom_density(fill='#03440C', alpha = 0.7) +
+  ylab("No. sites") +
+  xlab("Fraction of missing individuals")
+```
+
+# Minor allele frequencies
+
+```{r sum_maf, echo=FALSE, warning=FALSE}
+frq$MAF <- frq %>% select(A1, A2) %>% apply(1, function(z) min(z))
+summary(frq$MAF)
+```
+```{r maf, echo=FALSE, warning=FALSE}
+ggplot(frq, aes(MAF, after_stat(count))) +
+  geom_density(fill='#03440C', alpha = 0.7) +
+  ylab("No. sites") +
+  xlab("Minor allele frequency")
+```
+
+# Inbreeding coefficients
+```{r het_plot, echo=FALSE, warning=FALSE}
+ggplot(het, aes(x=as.factor(INDV), y=F)) +
+  geom_bar(stat = 'identity', fill='#03440C', alpha = 0.7, color='black') +
+  xlab("Individual") +
+  ylab(expression("Inbreeding coefficient F"["IS"]))+
+  coord_flip()
+```
+
+```{r het, echo=FALSE, warning=FALSE}
+colnames(het) <- c('Indiviual', 'Observed homozygosity', 'Expected homozygosity', 'Number of sites', 'F_IS')
+kable(het)
+```
+
