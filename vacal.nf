@@ -6,6 +6,7 @@ log.info """\
          Reference file          : ${params.ref}
          Output directory        : ${params.outdir}
          Chromosome list         : ${params.chr}
+         BP chromosome split     : ${params.split}
          """
          .stripIndent()
 
@@ -44,13 +45,58 @@ process IndexBams {
   """
 }
 
+process CreateChrlist {
+  publishDir "${workDir}", mode: 'copy'
+
+  input:
+  val(chr) from chr_list
+
+  output:
+  stdout into chrsplit_ch
+
+  script:
+  """
+#!/usr/bin/env python
+from Bio import SeqIO
+
+chr = "$chr"
+ref = SeqIO.parse("$params.ref","fasta")
+piece = $params.split
+
+for rec in ref:
+    id = rec.id
+    if id == chr:
+        nparts = len(rec.seq)/piece
+        if nparts < 1:
+            line = "$chr"
+            print(line)
+        else:
+            for i in range(1,int(nparts) + 1):
+                if i == 1:
+                    start = 0
+                    end = piece * i
+                elif i == int(nparts):
+                    start = piece * i + 1
+                    end = len(rec.seq)
+                else:
+                    start = piece * (i-1) + 1
+                    end = piece * i
+                line = "$chr"+":"+str(start)+"-"+str(end)
+                print(line)
+
+  """
+}
+
+
+chrsplit_lines = chrsplit_ch.splitText()
+
 process CallVariants {
 
   label 'RAM_high'
 
   input:
   file(allf) from ibam_ch.collect()
-  each chr from chr_list
+  each chr from chrsplit_lines
 
   output:
   file('*') into chrvcf_ch
@@ -59,9 +105,8 @@ process CallVariants {
   def bams = allf.findAll{it =~ /bam_RG$/}
   //def bams = allf.collect { assert it ==~ pattern }
   """
-  freebayes -f ${params.ref} -r $chr ${bams.join(' ')}  > ${chr}.vcf
+  freebayes -f ${params.ref} -r ${chr.trim()} ${bams.join(' ')}  > ${chr.trim()}.vcf
   """
-
 
 }
 
@@ -106,7 +151,7 @@ process MergeVCF {
   script:
   def vcfs = all_chr.findAll{it =~ /gz$/}
   """
-  bcftools concat ${vcfs.join(' ')} | bgzip -c > nfvacal_out.vcf.gz
+  bcftools concat -a ${vcfs.join(' ')} | vcf-sort | bgzip > nfvacal_out.vcf.gz
   """
 }
 
@@ -122,10 +167,12 @@ process Stats {
   script:
   """
   bcftools index -f $vcf
+  tabix $vcf
   vcfstats $vcf > vcfstats.txt
   vcfrandomsample -r 0.01  $vcf > ${vcf.baseName}_subset.vcf
   bgzip ${vcf.baseName}_subset.vcf
-  bcftools index ${vcf.baseName}_subset.vcf.gz
+  bcftools index -f ${vcf.baseName}_subset.vcf.gz
+  tabix ${vcf.baseName}_subset.vcf.gz
   vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --freq2 --max-alleles 2
   vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --depth
   vcftools --gzvcf ${vcf.baseName}_subset.vcf.gz --site-mean-depth
