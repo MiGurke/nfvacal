@@ -146,12 +146,15 @@ process MergeVCF {
   file(all_chr) from chrvcfgzi_ch.collect()
 
   output:
-  file('*out.vcf.gz') into vcf_ch
+  file('*final.vcf.gz') into vcf_ch
 
   script:
   def vcfs = all_chr.findAll{it =~ /gz$/}
   """
-  bcftools concat -a ${vcfs.join(' ')} | vcf-sort | bgzip > nfvacal_out.vcf.gz
+  bcftools concat -a ${vcfs.join(' ')} > nfvacal_out.vcf
+  grep "^#" nfvacal_out.vcf > nfvacal_final.vcf
+  grep -v "^#" nfvacal_out.vcf| sort -k1,1V -k2,2g >> nfvacal_final.vcf
+  bgzip nfvacal_final.vcf
   """
 }
 
