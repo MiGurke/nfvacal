@@ -31,7 +31,7 @@ nextflow run vacal.nf --bamdir /PATH/TO/BAMS/ --ref /PATH/TO/REFERENCE/file.fast
 
 **Splitting Scaffolds:**
 
-The scaffolds are split into sections of the size given by the split parameter. This allows the parallelization of the variant calling step. According to the length chosen, each scaffold will be split into to so many sections and a variant call job will be started for each of them. Since the whole pipeline is restricted to start only 10 jobs at once and each variant calling job currently uses 32 GB of RAM, all of these settings need to be adapted to the analyzed data set. (RAM and queue size can be changed in the mfn.config file in the config folder.) Otherwise, the pipeline can easily get killed because it exceeds the memory limit, but if thats happening you can resume from were it stopped adding the "-resume" parameter.  
+The scaffolds are split into sections of the size given by the split parameter. This allows the parallelization of the variant calling step. According to the length chosen, each scaffold will be split into to so many sections and a variant call job will be started for each of them. Since the whole pipeline is per default restricted to start only 5 jobs at once and each variant calling job currently uses 100 GB of RAM, all of these settings need to be adapted to the analyzed data set. (RAM and queue size can be changed in the mfn.config file in the config folder.) Otherwise, the pipeline can easily get killed because it exceeds the memory limit, but if thats happening you can resume from were it stopped adding the "-resume" parameter.  
 
 **Output:**
 
