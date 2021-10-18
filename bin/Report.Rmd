@@ -1,6 +1,6 @@
 ---
 title: "NFVACAL Report"
-output: 
+output:
   html_document:
     theme: yeti
     toc: true
@@ -41,7 +41,7 @@ colnames(frq) <- c('CHROM','POS','N_ALLELES','N_CHR', 'A1', 'A2')
 ```
 
 
-This report contains the statistics about the variant calling just done using ncvacal. 
+This report contains the statistics about the variant calling just done using ncvacal.
 
 # General statistics (vcfstats)
 
@@ -74,11 +74,6 @@ ggplot(idepth, aes(x=as.factor(INDV), y=MEAN_DEPTH)) +
   coord_flip()
 ```
 
-```{r idepth, echo=FALSE, warning=FALSE}
-colnames(idepth) <- c('Indiviual', 'No. Sites', 'Mean Depth')
-kable(idepth)
-```
-
 ## Depth per site
 
 Summary stats of mean depth per site:
@@ -91,7 +86,7 @@ summary(ldepth$MEAN_DEPTH)
 ggplot(ldepth, aes(MEAN_DEPTH, after_stat(count))) +
   geom_density(fill='#03440C', alpha = 0.7) +
   ylab("No. sites") +
-  xlab("Mean Depth") 
+  xlab("Mean Depth")
 ```
 
 # Missing data at variant sites
@@ -105,13 +100,9 @@ ggplot(imiss, aes(x=as.factor(INDV), y=F_MISS)) +
   coord_flip()
 ```
 
-```{r imiss, echo=FALSE, warning=FALSE}
-colnames(imiss) <- c('Indiviual', 'Total variant sites', 'No. of genotypes filtered', 'No. of missing sites', 'Fraction of missing sites')
-kable(imiss)
-```
 ## Missing individuals per variant
 
-Summary stats of fraction of missing individuals per site: 
+Summary stats of fraction of missing individuals per site:
 ```{r lmiss_sum, echo=FALSE, warning=FALSE}
 summary(lmiss$F_MISS)
 ```
@@ -145,7 +136,6 @@ ggplot(het, aes(x=as.factor(INDV), y=F)) +
 ```
 
 ```{r het, echo=FALSE, warning=FALSE}
-colnames(het) <- c('Indiviual', 'Observed homozygosity', 'Expected homozygosity', 'Number of sites', 'F_IS')
-kable(het)
+colnames(het) <- c('Individual', 'Observed homozygosity', 'Expected homozygosity', 'Number of sites', 'F_IS')
+kable(het[,-4])
 ```
-
