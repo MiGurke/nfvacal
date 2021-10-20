@@ -86,7 +86,7 @@ summary(ldepth$MEAN_DEPTH)
 ggplot(ldepth, aes(MEAN_DEPTH, after_stat(count))) +
   geom_density(fill='#03440C', alpha = 0.7) +
   ylab("No. sites") +
-  xlab("Mean Depth")
+  xlab("Depth")
 ```
 
 # Missing data at variant sites
