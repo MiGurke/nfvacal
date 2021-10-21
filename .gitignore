@@ -5,3 +5,5 @@ work/
 
 #Ignore these files:
 .nextflow.log*
+bin/.Rhistory
+filter_variants/bin/.Rhistory

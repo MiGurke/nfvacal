@@ -7,6 +7,7 @@ log.info """\
          Output directory        : ${params.outdir}
          Chromosome list         : ${params.chr}
          BP chromosome split     : ${params.split}
+         Stats subsample fraction: ${params.frac}
          """
          .stripIndent()
 
@@ -172,7 +173,7 @@ process Stats {
   bcftools index -f $vcf
   tabix $vcf
   vcfstats $vcf > vcfstats.txt
-  vcfrandomsample -r 0.01  $vcf > ${vcf.baseName}_subset.vcf
+  vcfrandomsample -r ${params.frac}  $vcf > ${vcf.baseName}_subset.vcf
   bgzip ${vcf.baseName}_subset.vcf
   bcftools index -f ${vcf.baseName}_subset.vcf.gz
   tabix ${vcf.baseName}_subset.vcf.gz
