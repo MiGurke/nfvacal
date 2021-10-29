@@ -84,7 +84,6 @@ for rec in ref:
                     end = piece * i
                 line = "$chr"+":"+str(start)+"-"+str(end)
                 print(line)
-
   """
 }
 

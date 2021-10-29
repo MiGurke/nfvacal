@@ -6,11 +6,12 @@ Steps of the pipeline are:
 
 1. Adding RG individual tags to the bam file to later be able to identify different individuals in the final cvf file.
 2. Index bam files./
-3. Calling of variants for all individuals simultaneously, but in parallel for sections of the scaffolds of the reference genome using freebayes. 
-4. Compressing the resulting vcf files. 
-5. Merging of all chromosome vcf's into one final file. 
-6. Calculating statistics about the file using vcftools and vcflib.
-7. Creating a html report from the stats. 
+3. Splitting the scaffolds of the reference genome into sections of a given size.
+4. Calling of variants for all individuals simultaneously, but in parallel for the sections of the scaffolds genome using freebayes. 
+5. Compressing the resulting vcf files. 
+6. Merging of all chromosome vcf's into one final file. 
+7. Calculating statistics about the file using vcftools and vcflib.
+8. Creating a html report from the stats. 
 
 
 
@@ -35,4 +36,39 @@ The scaffolds are split into sections of the size given by the split parameter. 
 
 **Output:**
 
-The output consists of one final vcf file holding all chromosomes and individuals. In addition to this there will be a Report.html file, which contains a summary from the variant statistics. The statistics files from which the report was created, are also part of the output and will be located in a folder called stats. 
+The output consists of one final vcf file holding all chromosomes and individuals. In addition to this there will be a Report.html file, which contains a summary from the variant statistics. The statistics files from which the report was created, are also part of the output and will be located in a folder called stats.
+
+## Variant filtering
+
+In addition to the variant calling pipeline, there is a small pipeline in the filter_variant folder for filtering the variants. It includes these steps: 
+
+1. Filtering of the variants using vcftools.
+2. Calculating statistics about the file using vcftools and vcflib.
+3. Creating a html report from the stats.
+
+### Usage
+
+```bash
+nextflow run filter.nf --vcf /PATH/TO/VCF.vcf --outdir /PATH/TO/OUTPUT/DIRECTORY/ --frac 0.01
+
+```
+
+**Parameters:**
+
+*  --vcf : Path to to the vcf file. 
+*  --outdir : Path to a directory were the output should be written into. 
+*  --frac : A fration to which the VCF file should be subsampled for the more precise statistics. Saves time for large VCF's.
+
+In addition to those parameters, filter parameters can be set. The parameter defaults can be found in the nextflow.config file inside the filter_variants folder. I find it more convient to set them there, but they can also be set in the command. The parameters that can be set are the following.
+
+*  --min_qual : Minimum variant quality filter.
+*  --min_depth : Minimum read depth at variant position.
+*  --max_depth : Maximum read depth at variant position.
+*  --missingness : Fraction of not missing individuals per variant.
+*  --min_maf : Minimum frequency of the minor allele. 
+
+Per default, indels are also removed in the filtering step. 
+
+**Output:**
+
+The main output is the filtered vcf file and there will be the same stats and report files for the filtered file as were created in the variant calling pipeline. So maybe don't use the same ouput folder for the filter and variant calling pipelines, otherwise stats files might be overwritten. 
