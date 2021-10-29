@@ -20,27 +20,12 @@ Channel
   .fromPath("${params.vcf}")
   .set{vcf_ch}
 
-process Filter {
-
-  publishDir "${params.outdir}", mode: 'copy'
-
-  input:
-  file(vcf) from vcf_ch
-
-  output:
-  file('*') into filvcf_ch
-
-  script:
-  """
-  vcftools --gzvcf $vcf --remove-indels --maf ${params.min_maf} --max-missing ${params.missingness} --minQ ${params.min_qual} --min-meanDP ${params.min_depth} --max-meanDP ${params.max_depth} --minDP ${params.min_depth} --maxDP ${params.max_depth} --recode --stdout | bgzip > nfvacal_out_filtered.vcf.gz
-  """
-}
 
 process Stats {
   publishDir "${params.outdir}/stats/", mode: 'copy'
 
   input:
-  file(vcf) from filvcf_ch
+  file(vcf) from vcf_ch
 
   output:
   tuple file('*.frq'), file('*.het'), file('*.idepth'), file('*.imiss'), file('*.ldepth.mean'), file('*.lmiss'), file('*.lqual'), file('*.txt') into stats_ch
