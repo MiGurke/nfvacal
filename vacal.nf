@@ -16,7 +16,13 @@ Channel
   .fromPath("${params.bamdir}*/*.bam")
   .set{bam_ch}
 
+Channel
+  .fromPath("${params.bamdir}*/*.bam")
+  .set{samp_ch}
+
+
 chr_list = file(params.chr).readLines()
+
 
 process AddRG {
 
@@ -124,10 +130,27 @@ process CompressVCF {
   """
 }
 
+process SortSamples {
+
+  input:
+  file(samp_list) from samp_ch.collect()
+  each file(chr) from chrvcfgz_ch
+
+  output:
+  file('*.gz') into chrvcfgzso_ch
+
+  script:
+  samps = samp_list.baseName
+  """
+  tabix ${chr}
+  bcftools view ${chr} -s ${samps.join(',')} -Oz > S_${chr}
+  """
+}
+
 process IndexVCF {
 
   input:
-  file(chr) from chrvcfgz_ch
+  file(chr) from chrvcfgzso_ch
 
   output:
   tuple file(chr), file('*') into chrvcfgzi_ch
@@ -151,7 +174,7 @@ process MergeVCF {
   script:
   def vcfs = all_chr.findAll{it =~ /gz$/}
   """
-  picard MergeVcfs -I ${vcfs.join(' -I ')} -O nfvacal_out.vcf
+  bcftools concat ${vcfs.join(' ')} > nfvacal_out.vcf
   grep "^#" nfvacal_out.vcf > nfvacal_final.vcf
   grep -v "^#" nfvacal_out.vcf| sort -k1,1V -k2,2g >> nfvacal_final.vcf
   bgzip nfvacal_final.vcf

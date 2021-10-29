@@ -1,17 +1,19 @@
 # Nfvacal - nextflow variant calling pipeline using freebayes
 
- This pipeline calls variants from bam files of multiple individuals using freebayes. It is adapted for usage on the MfN cluster. 
+ This pipeline calls variants from bam files of multiple individuals using freebayes. It is adapted for usage on the MfN cluster.
 
-Steps of the pipeline are: 
+Steps of the pipeline are:
 
 1. Adding RG individual tags to the bam file to later be able to identify different individuals in the final cvf file.
 2. Index bam files./
 3. Splitting the scaffolds of the reference genome into sections of a given size.
-4. Calling of variants for all individuals simultaneously, but in parallel for the sections of the scaffolds genome using freebayes. 
-5. Compressing the resulting vcf files. 
-6. Merging of all chromosome vcf's into one final file. 
-7. Calculating statistics about the file using vcftools and vcflib.
-8. Creating a html report from the stats. 
+4. Calling of variants for all individuals simultaneously, but in parallel for the sections of the scaffolds genome using freebayes.
+5. Compressing the resulting vcf files.
+6. Sorting the samples in the vcf file.
+7. Indexing the files.
+8. Merging of all chromosome vcf's into one final file.
+9. Calculating statistics about the file using vcftools and vcflib.
+10. Creating a html report from the stats. 
 
 
 
@@ -23,10 +25,10 @@ nextflow run vacal.nf --bamdir /PATH/TO/BAMS/ --ref /PATH/TO/REFERENCE/file.fast
 
 **Parameters:**
 
-* --bamdir : Path to directory in with sub folders for each individual. Each sub folder must hold one bam file. 
+* --bamdir : Path to directory in with sub folders for each individual. Each sub folder must hold one bam file.
 * --ref : Path to the reference genome assembly fasta file.
-* --outdir : Path to directory were the output of the pipeline will be written into. 
-* --chr : Path to a file that contains a list chromosome names of from the reference fasta, which should be included in the variant calling. 
+* --outdir : Path to directory were the output of the pipeline will be written into.
+* --chr : Path to a file that contains a list chromosome names of from the reference fasta, which should be included in the variant calling.
 * --split : Length in BP of section in which the scaffolds of the reference are divided will be variant called separately.
 * -with-report : Nextflow parameter to create a html report about the computational resources the job needed. (Not to be confused with the html report that will be created from the variant calling statistics. That one will be in the outdir.)
 
@@ -40,7 +42,7 @@ The output consists of one final vcf file holding all chromosomes and individual
 
 ## Variant filtering
 
-In addition to the variant calling pipeline, there is a small pipeline in the filter_variant folder for filtering the variants. It includes these steps: 
+In addition to the variant calling pipeline, there is a small pipeline in the filter_variant folder for filtering the variants. It includes these steps:
 
 1. Filtering of the variants using vcftools.
 2. Calculating statistics about the file using vcftools and vcflib.
@@ -55,8 +57,8 @@ nextflow run filter.nf --vcf /PATH/TO/VCF.vcf --outdir /PATH/TO/OUTPUT/DIRECTORY
 
 **Parameters:**
 
-*  --vcf : Path to to the vcf file. 
-*  --outdir : Path to a directory were the output should be written into. 
+*  --vcf : Path to to the vcf file.
+*  --outdir : Path to a directory were the output should be written into.
 *  --frac : A fration to which the VCF file should be subsampled for the more precise statistics. Saves time for large VCF's.
 
 In addition to those parameters, filter parameters can be set. The parameter defaults can be found in the nextflow.config file inside the filter_variants folder. I find it more convient to set them there, but they can also be set in the command. The parameters that can be set are the following.
@@ -65,10 +67,10 @@ In addition to those parameters, filter parameters can be set. The parameter def
 *  --min_depth : Minimum read depth at variant position.
 *  --max_depth : Maximum read depth at variant position.
 *  --missingness : Fraction of not missing individuals per variant.
-*  --min_maf : Minimum frequency of the minor allele. 
+*  --min_maf : Minimum frequency of the minor allele.
 
-Per default, indels are also removed in the filtering step. 
+Per default, indels are also removed in the filtering step.
 
 **Output:**
 
-The main output is the filtered vcf file and there will be the same stats and report files for the filtered file as were created in the variant calling pipeline. So maybe don't use the same ouput folder for the filter and variant calling pipelines, otherwise stats files might be overwritten. 
+The main output is the filtered vcf file and there will be the same stats and report files for the filtered file as were created in the variant calling pipeline. So maybe don't use the same ouput folder for the filter and variant calling pipelines, otherwise stats files might be overwritten.
