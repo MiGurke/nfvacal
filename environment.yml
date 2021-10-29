@@ -1,3 +1,4 @@
+name: nfvacal
 channels:
  - conda-forge
  - bioconda
