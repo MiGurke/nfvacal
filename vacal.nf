@@ -174,9 +174,9 @@ process MergeVCF {
   script:
   def vcfs = all_chr.findAll{it =~ /gz$/}
   """
-  bcftools concat ${vcfs.join(' ')} > nfvacal_out.vcf
+  bcftools concat -a ${vcfs.join(' ')} > nfvacal_out.vcf
   grep "^#" nfvacal_out.vcf > nfvacal_final.vcf
-  grep -v "^#" nfvacal_out.vcf| sort -k1,1V -k2,2g >> nfvacal_final.vcf
+  grep -v "^#" nfvacal_out.vcf| sort -T ./ -k1,1V -k2,2g >> nfvacal_final.vcf
   bgzip nfvacal_final.vcf
   """
 }
