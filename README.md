@@ -1,6 +1,6 @@
 # Nfvacal - nextflow variant calling pipeline using freebayes
 
- This pipeline calls variants from bam files of multiple individuals using freebayes. It is adapted for usage on the MfN cluster.
+ This pipeline calls variants from bam files of multiple individuals using [freebayes](https://github.com/freebayes/freebayes). It is adapted for usage on the MfN cluster.
 
 Steps of the pipeline are:
 
