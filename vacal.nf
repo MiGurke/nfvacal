@@ -8,6 +8,7 @@ log.info """\
          Chromosome list         : ${params.chr}
          BP chromosome split     : ${params.split}
          Stats subsample fraction: ${params.frac}
+         Populations list        : ${params.poplist}
          """
          .stripIndent()
 
@@ -95,25 +96,45 @@ for rec in ref:
 
 
 chrsplit_lines = chrsplit_ch.splitText()
+if (params.poplist == null) {
+  process CallVariants {
 
-process CallVariants {
+    label 'RAM_high'
 
-  label 'RAM_high'
+    input:
+    file(allf) from ibam_ch.collect()
+    each chr from chrsplit_lines
 
-  input:
-  file(allf) from ibam_ch.collect()
-  each chr from chrsplit_lines
+    output:
+    file('*') into chrvcf_ch
 
-  output:
-  file('*') into chrvcf_ch
+    script:
+    def bams = allf.findAll{it =~ /bam_RG$/}
+    //def bams = allf.collect { assert it ==~ pattern }
+    """
+    freebayes -f ${params.ref} -r ${chr.trim()} ${bams.join(' ')} > ${chr.trim()}.vcf
+    """
 
-  script:
-  def bams = allf.findAll{it =~ /bam_RG$/}
-  //def bams = allf.collect { assert it ==~ pattern }
-  """
-  freebayes -f ${params.ref} -r ${chr.trim()} ${bams.join(' ')}  > ${chr.trim()}.vcf
-  """
+  }
+} else {
+  process CallVariantsPop {
 
+    label 'RAM_high'
+
+    input:
+    file(allf) from ibam_ch.collect()
+    each chr from chrsplit_lines
+
+    output:
+    file('*') into chrvcf_ch
+
+    script:
+    def bams = allf.findAll{it =~ /bam_RG$/}
+    //def bams = allf.collect { assert it ==~ pattern }
+    """
+    freebayes -f ${params.ref} -r ${chr.trim()} ${bams.join(' ')} --populations ${params.poplist} > ${chr.trim()}.vcf
+    """
+  }
 }
 
 process CompressVCF {
