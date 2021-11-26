@@ -21,6 +21,10 @@ if(!require('ggplot2')){
     install.packages('ggplot2', dependencies = TRUE)
     library('ggplot2')
 }
+if(!require('ggforce')){
+    install.packages('ggforce', dependencies = TRUE)
+    library('ggforce')
+}
 if(!require('readr')){
     install.packages('readr', dependencies = TRUE)
     library('readr')
@@ -74,7 +78,8 @@ summary(lqual$QUAL)
 ggplot(lqual, aes(QUAL, after_stat(count))) +
   geom_density(fill='#03440C', alpha = 0.7) +
   ylab("No. sites") +
-  xlab("Quality score")
+  xlab("Quality score") +
+  facet_zoom(xlim= c(0,median(lqual$QUAL) + 1000))
 ```
 
 # Variant depth
@@ -85,7 +90,7 @@ ggplot(idepth, aes(x=as.factor(INDV), y=MEAN_DEPTH)) +
   geom_bar(stat = 'identity', fill='#03440C', alpha = 0.7, colour='black') +
   xlab("Individual") +
   ylab("Mean depth") +
-  coord_flip()
+  coord_flip() 
 ```
 
 ## Depth per site
@@ -100,7 +105,8 @@ summary(ldepth$MEAN_DEPTH)
 ggplot(ldepth, aes(MEAN_DEPTH, after_stat(count))) +
   geom_density(fill='#03440C', alpha = 0.7) +
   ylab("No. sites") +
-  xlab("Depth")
+  xlab("Depth") +
+  facet_zoom(xlim= c(0,median(ldepth$MEAN_DEPTH) + 10))
 ```
 
 # Missing data at variant sites
