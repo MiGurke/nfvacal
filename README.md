@@ -20,7 +20,7 @@ Steps of the pipeline are:
 ## Usage
 
 ```bash
-nextflow run vacal.nf --bamdir /PATH/TO/BAMS/ --ref /PATH/TO/REFERENCE/file.fasta --outdir /PATH/TO/DIR/TO/PUT/OUTPUT/ --chr /PATH/TO/CHROMOSOME/file.list -with-report /PATH/TO/REPORT/file.html --split INT
+nextflow run vacal.nf --bamdir /PATH/TO/BAMS/ --ref /PATH/TO/REFERENCE/file.fasta --outdir /PATH/TO/DIR/TO/PUT/OUTPUT/ --chr /PATH/TO/CHROMOSOME/file.list -with-report /PATH/TO/REPORT/file.html --split INT --poplist /PATH/TO/POP.LIST
 ```
 
 **Parameters:**
@@ -30,6 +30,7 @@ nextflow run vacal.nf --bamdir /PATH/TO/BAMS/ --ref /PATH/TO/REFERENCE/file.fast
 * --outdir : Path to directory were the output of the pipeline will be written into.
 * --chr : Path to a file that contains a list chromosome names of from the reference fasta, which should be included in the variant calling.
 * --split : Length in BP of section in which the scaffolds of the reference are divided will be variant called separately.
+* --poplist : Path to tab separated file with columns. Column 1 contains the the sample names and column two contains the name of the population the sample belongs to. Using this parameter initiates variant calling for each population and not all samples as one population. 
 * -with-report : Nextflow parameter to create a html report about the computational resources the job needed. (Not to be confused with the html report that will be created from the variant calling statistics. That one will be in the outdir.)
 
 **Splitting Scaffolds:**
