@@ -9,6 +9,8 @@ log.info """\
          BP chromosome split     : ${params.split}
          Stats subsample fraction: ${params.frac}
          Populations list        : ${params.poplist}
+         High cov number of reads: ${params.numreads}
+         High cov divide by      : ${params.div}
          """
          .stripIndent()
 
@@ -46,6 +48,7 @@ process IndexBams {
 
   output:
   tuple file(bam), file('*.bai') into ibam_ch
+  tuple file(bam), file('*.bai') into ibam2_ch
 
   script:
   """
@@ -57,48 +60,43 @@ process CreateChrlist {
   publishDir "${workDir}", mode: 'copy'
 
   input:
+  file(allf) from ibam2_ch.collect()
   val(chr) from chr_list
 
   output:
   stdout into chrsplit_ch
 
   script:
+  def bams = allf.findAll{it =~ /bam_RG$/}
   """
-#!/usr/bin/env python
-from Bio import SeqIO
+  split=\$(python ${projectDir}/bin/chr_splitter.py -c $chr -r $params.ref -p $params.split)
 
-chr = "$chr"
-ref = SeqIO.parse("$params.ref","fasta")
-piece = $params.split
-
-for rec in ref:
-    id = rec.id
-    if id == chr:
-        nparts = len(rec.seq)/piece
-        if nparts < 1:
-            line = "$chr"
-            print(line)
-        else:
-            for i in range(1,int(nparts) + 1):
-                if i == 1:
-                    start = 0
-                    end = piece * i
-                elif i == int(nparts):
-                    start = piece * i + 1
-                    end = len(rec.seq)
-                else:
-                    start = piece * (i-1) + 1
-                    end = piece * i
-                line = "$chr"+":"+str(start)+"-"+str(end)
-                print(line)
-  """
+  for item in \$split; do
+    mreads=\$(for f in ${bams.join(' ')}; do samtools view -c \$f \$item ; done | awk '{ sum += \$1 } END { if (NR > 0) print sum / NR }')
+    if [ \$( echo "\$mreads < ${params.numreads}" | bc ) -ne 0 ] ; then
+     echo \$item
+    else
+     start=\$(echo \$item | sed 's/.*://' | sed 's/-.*//')
+     end=\$(echo \$item |sed 's/.*-//')
+     inc=\$(echo "10000 / ${params.div}" | bc)
+     for i in \$(seq \$start \$inc \$end); do
+       e=\$(echo "(\$i + \$inc) - 1" | bc)
+       if ((\$e > \$end)); then
+        echo "NW_023416402.1:\$i-\$end"
+      else
+        echo "NW_023416402.1:\$i-\$e"
+      fi
+     done
+    fi
+   done
+   """
 }
 
 
 chrsplit_lines = chrsplit_ch.splitText()
 if (params.poplist == null) {
   process CallVariants {
-
+    publishDir "${params.outdir}", mode: 'copy'
     label 'RAM_high'
 
     input:
@@ -118,7 +116,7 @@ if (params.poplist == null) {
   }
 } else {
   process CallVariantsPop {
-
+    publishDir "${params.outdir}", mode: 'copy'
     label 'RAM_high'
 
     input:
