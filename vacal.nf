@@ -82,9 +82,9 @@ process CreateChrlist {
      for i in \$(seq \$start \$inc \$end); do
        e=\$(echo "(\$i + \$inc) - 1" | bc)
        if ((\$e > \$end)); then
-        echo "NW_023416402.1:\$i-\$end"
+        echo "${chr}:\$i-\$end"
       else
-        echo "NW_023416402.1:\$i-\$e"
+        echo "${chr}:\$i-\$e"
       fi
      done
     fi
