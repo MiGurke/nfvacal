@@ -73,7 +73,7 @@ process CreateChrlist {
 
   for item in \$split; do
     mreads=\$(for f in ${bams.join(' ')}; do samtools view -c \$f \$item ; done | awk '{ sum += \$1 } END { if (NR > 0) print sum / NR }')
-    if [ \$( echo "\$mreads < ${params.numreads}" | bc ) -ne 0 ] ; then
+    if [ \$( echo "\$mreads < ${params.highcov}" | bc ) -ne 0 ] ; then
      echo \$item
     else
      start=\$(echo \$item | sed 's/.*://' | sed 's/-.*//')
