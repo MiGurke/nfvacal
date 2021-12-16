@@ -9,7 +9,7 @@ log.info """\
          BP chromosome split     : ${params.split}
          Stats subsample fraction: ${params.frac}
          Populations list        : ${params.poplist}
-         High cov number of reads: ${params.numreads}
+         High cov number of reads: ${params.highcov}
          High cov divide by      : ${params.div}
          """
          .stripIndent()
