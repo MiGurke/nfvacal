@@ -87,12 +87,14 @@ process CreateChrlist {
         else
          start=\$(echo \$item | sed 's/.*://' | sed 's/-.*//')
          end=\$(echo \$item |sed 's/.*-//')
-         inc=\$(echo "10000 / ${params.div}" | bc)
+         inc=\$(echo "${params.split} / ${params.div}" | bc)
          for i in \$(seq \$start \$inc \$end); do
            e=\$(echo "(\$i + \$inc) - 1" | bc)
            if ((\$e > \$end)); then
-            echo "${chr}:\$i-\$end"
-          else
+            if ((\$end != \$i)); then
+              echo "${chr}:\$i-\$end"
+            fi
+           else
             echo "${chr}:\$i-\$e"
           fi
          done
