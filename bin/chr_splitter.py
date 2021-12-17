@@ -22,8 +22,7 @@ for rec in ref:
     if id == chr:
         nparts = len(rec.seq)/piece
         if nparts < 1:
-            line = chr
-            print(line)
+            print("")
         else:
             for i in range(1,int(nparts) + 1):
                 if i == 1:
@@ -35,5 +34,5 @@ for rec in ref:
                 else:
                     start = piece * (i-1) + 1
                     end = piece * i
-                line = chr+":"+str(start)+"-"+str(end)
-                print(line+"\n")
+                line = chr + ":" + str(start) + "-" + str(end)
+                print(line + "\n")
