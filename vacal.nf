@@ -24,8 +24,12 @@ Channel
   .set{samp_ch}
 
 
-chr_list = file(params.chr).readLines()
-
+chr_l = file(params.chr).readLines()
+chr_list = Channel.from(chr_l)
+//Channel
+  //  .fromList(chr_l)
+  //  .set(chr_list)
+//chr_list.view {print "$it"}
 
 process AddRG {
 
@@ -56,15 +60,16 @@ process IndexBams {
   """
 }
 
+
 process CreateChrlist {
-  publishDir "${workDir}", mode: 'copy'
 
   input:
   file(allf) from ibam2_ch.collect()
-  val(chr) from chr_list
+  each chr from chr_list
 
   output:
   stdout into chrsplit_ch
+  stdout ch
 
   script:
   def bams = allf.findAll{it =~ /bam_RG$/}
@@ -92,8 +97,10 @@ process CreateChrlist {
    """
 }
 
+//ch.view { print "$it" }
 
 chrsplit_lines = chrsplit_ch.splitText()
+
 if (params.poplist == null) {
   process CallVariants {
     publishDir "${params.outdir}", mode: 'copy'
