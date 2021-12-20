@@ -18,28 +18,28 @@ params:
 
 ```{r setup, include=FALSE}
 if(!require('ggplot2')){
-    install.packages('ggplot2', dependencies = TRUE)
+    install.packages('ggplot2', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('ggplot2')
 }
 if(!require('ggforce')){
-    install.packages('ggforce', dependencies = TRUE)
+    install.packages('ggforce', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('ggforce')
 }
 if(!require('readr')){
-    install.packages('readr', dependencies = TRUE)
+    install.packages('readr', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('readr')
 }
 if(!require('knitr')){
-    install.packages('knitr', dependencies = TRUE)
+    install.packages('knitr', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('knitr')
 }
 if(!require('dplyr')){
-    install.packages('dplyr', dependencies = TRUE)
+    install.packages('dplyr', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('dplyr')
 }
 
 if(!require('rmarkdown')){
-    install.packages('rmarkdown', dependencies = TRUE)
+    install.packages('rmarkdown', dependencies = TRUE, repos = "http://cran.us.r-project.org")
     library('rmarkdown')
 }
 
