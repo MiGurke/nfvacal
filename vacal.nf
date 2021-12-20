@@ -105,13 +105,13 @@ process CreateChrlist {
    """
 }
 
-ch.view { print "$it" }
+//ch.view { print "$it" }
 
 chrsplit_lines = chrsplit_ch.splitText()
 
 if (params.poplist == null) {
   process CallVariants {
-    publishDir "${params.outdir}", mode: 'copy'
+
     label 'RAM_high'
 
     input:
@@ -131,7 +131,7 @@ if (params.poplist == null) {
   }
 } else {
   process CallVariantsPop {
-    publishDir "${params.outdir}", mode: 'copy'
+
     label 'RAM_high'
 
     input:
