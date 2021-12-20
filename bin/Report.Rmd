@@ -25,6 +25,10 @@ if(!require('ggforce')){
     install.packages('ggforce', dependencies = TRUE, repos = "https://cloud.r-project.org/")
     library('ggforce')
 }
+if(!require('Rcpp')){
+    install.packages('Rcpp', dependencies = TRUE, repos = "https://cloud.r-project.org/")
+    library('Rcpp')
+}
 if(!require('readr')){
     install.packages('readr', dependencies = TRUE, repos = "https://cloud.r-project.org/")
     library('readr')
