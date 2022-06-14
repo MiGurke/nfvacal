@@ -15,4 +15,4 @@ dependencies:
  - vcftools=0.1.16
  - bamaddrg
  - biopython
- - nextflow 
+ - nextflow=21.04.0

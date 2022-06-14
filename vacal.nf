@@ -68,13 +68,12 @@ process CreateChrlist {
   each chr from chr_list
 
   output:
-  stdout into chrsplit_ch
-  stdout ch
+  stdout() into chrsplit_ch
 
   script:
   def bams = allf.findAll{it =~ /bam_RG$/}
   """
-  split=\$(python ${projectDir}/bin/chr_splitter.py -c $chr -r $params.ref -p $params.split)
+  split=\$(python3 ${projectDir}/bin/chr_splitter.py -c $chr -r $params.ref -p $params.split)
 
   if [[ -z "\$split" ]]
   then
